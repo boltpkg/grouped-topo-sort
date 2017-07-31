@@ -1,0 +1,9 @@
+{
+  "name": "grouped-topo-sort",
+  "version": "0.0.0",
+  "description": "Topological sort based on groups of interdependencies",
+  "main": "index.js",
+  "repository": "thejameskyle/grouped-topo-sort",
+  "author": "James Kyle <me@thejameskyle.com>",
+  "license": "MIT"
+}
