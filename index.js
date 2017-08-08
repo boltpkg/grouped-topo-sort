@@ -1,30 +1,43 @@
 'use strict';
 
+const chalk = require('chalk');
+
 function groupedTopoSort(graph, groups) {
-  let names = Object.keys(graph);
-  let sorted = [];
+  // TODO: detect cycles
+  let cycles = [];
 
-  function visit(name, group, visited) {
-    if (visited[name]) return;
+  function sortGroup(group, groupIndex) {
+    const g = {
+      contains: group,
+      visited: {},
+      sorted: [],
+    };
 
-    visited[name] = true;
+    function visit(name) {
+      if (g.visited[name]) return;
+      g.visited[name] = true;
+      graph[name].forEach(visit);
+      g.sorted.push(name);
+    }
 
-    graph[name].forEach(name => {
-      visit(name, group, visited);
+    group.forEach(visit);
+    return g;
+  }
+
+  const sortedGroups = groups.map(sortGroup);
+  const sorted = [];
+
+  sortedGroups.forEach(currentGroup => {
+    sortedGroups.forEach(innerGroup => {
+      innerGroup.sorted.forEach(i => {
+        if (currentGroup.contains.includes(i) && !sorted.includes(i)) {
+          sorted.push(i);
+        }
+      });
     });
+  });
 
-    if (!sorted.includes(name) && group.includes(name)) {
-      sorted.push(name);
-    }
-  }
-
-  for (let group of groups) {
-    for (let name of group) {
-      visit(name, group, {});
-    }
-  }
-
-  return sorted;
+  return { sorted, cycles };
 }
 
 module.exports = groupedTopoSort;
