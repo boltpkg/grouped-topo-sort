@@ -6,7 +6,7 @@ function groupedTopoSort(graph, groups) {
   let visitedNodes = [];
 
   function sortGroup(nodes, groupIndex) {
-    const g = {
+    const group = {
       contains: nodes,
       visited: {},
       sorted: [],
@@ -14,12 +14,12 @@ function groupedTopoSort(graph, groups) {
     };
 
     function sortNodes(name, branch) {
-      if (g.visited[name]) {
+      if (group.visited[name]) {
         return;
       }
-      g.visited[name] = true;
+      group.visited[name] = true;
       graph[name].forEach(sortNodes);
-      g.sorted.push(name);
+      group.sorted.push(name);
     }
 
     nodes.forEach(sortNodes);
@@ -44,13 +44,13 @@ function groupedTopoSort(graph, groups) {
             if (!cyclesIntoPreviousGroup) {
               let cyclesBackIntoGroup = false;
               for (let i = 1; i < branch.length; i++) {
-                if (g.contains.includes(branch[i])) {
+                if (group.contains.includes(branch[i])) {
                   cyclesBackIntoGroup = true;
                   break;
                 }
               }
               if (cyclesBackIntoGroup) {
-                g.cycles.push(currentBranch);
+                group.cycles.push(currentBranch);
                 cycleCache.push(cacheKey);
               }
             }
@@ -60,7 +60,7 @@ function groupedTopoSort(graph, groups) {
     }
 
     walkBranch(nodes);
-    visitedNodes = visitedNodes.concat(g.contains);
+    visitedNodes = visitedNodes.concat(group.contains);
 
     return g;
   }
