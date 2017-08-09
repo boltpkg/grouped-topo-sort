@@ -4,18 +4,35 @@ const chalk = require('chalk');
 const groupedTopoSort = require('./');
 
 function testCase({ graph, groups, expected }) {
-  let { sorted: result, cycles } = groupedTopoSort(graph, groups);
-  let actual = result.join(' -> ');
+  const { sorted, cycles } = groupedTopoSort(graph, groups);
 
-  if (expected.sorted !== actual) {
-    console.log(chalk.grey(`expected: [${expected.sorted}]`));
-    console.log(chalk.red(`..actual: [${actual}]`));
+  const result = {
+    sorted: sorted.join(' -> '),
+    cycles: cycles.map(i => i.join(' -> ')).join('] ['),
+  };
+
+  expected.cycles = expected.cycles ? expected.cycles.join('] [') : '';
+
+  if (expected.sorted !== result.sorted) {
+    console.log(chalk.grey(`sort expected:   [${expected.sorted}]`));
+    console.log(chalk.red(`sort result:     [${result.sorted}]`));
   } else {
-    console.log(chalk.green(`passed:   [${actual}]`));
+    console.log(chalk.green(`sort passed:     [${result.sorted}]`));
+  }
+
+  if (expected.cycles !== result.cycles) {
+    console.log(chalk.grey(`cycles expected: [${expected.cycles}]`));
+    console.log(chalk.red(`cycles result:   [${result.cycles}]`));
+  } else {
+    if (!result.cycles) {
+      console.log(chalk.green(`cycles passed:   ${chalk.grey('[none]')}`));
+    } else {
+      console.log(chalk.green(`cycles passed:   [${result.cycles}]`));
+    }
   }
 }
 
-console.log(chalk.white('\n----------------------------\n'));
+console.log(chalk.white('\n\n\n\n----------------------------\n\n\n\n'));
 
 testCase({
   graph: {
@@ -27,7 +44,6 @@ testCase({
   groups: [['a', 'b', 'c', 'd']],
   expected: {
     sorted: 'd -> c -> b -> a',
-    cycles: [],
   },
 });
 
@@ -41,7 +57,6 @@ testCase({
   groups: [['a', 'b', 'c', 'd']],
   expected: {
     sorted: 'b -> d -> c -> a',
-    cycles: [],
   },
 });
 
@@ -55,7 +70,6 @@ testCase({
   groups: [['a'], ['b', 'c', 'd']],
   expected: {
     sorted: 'a -> d -> c -> b',
-    cycles: [],
   },
 });
 
@@ -69,7 +83,7 @@ testCase({
   groups: [['a', 'b'], ['c', 'd']],
   expected: {
     sorted: 'b -> a -> d -> c',
-    cycles: [],
+    cycles: ['a -> b -> c -> d -> a'],
   },
 });
 
@@ -83,7 +97,7 @@ testCase({
   groups: [['a', 'c'], ['b', 'd']],
   expected: {
     sorted: 'c -> a -> d -> b',
-    cycles: [],
+    cycles: ['a -> b -> c -> d -> a'],
   },
 });
 
@@ -97,7 +111,7 @@ testCase({
   groups: [['a', 'b', 'c', 'd']],
   expected: {
     sorted: 'd -> c -> b -> a',
-    cycles: [],
+    cycles: ['a -> b -> c -> d -> a'],
   },
 });
 
@@ -111,7 +125,6 @@ testCase({
   groups: [['a'], ['b', 'c', 'd']],
   expected: {
     sorted: 'a -> d -> b -> c',
-    cycles: [],
   },
 });
 
@@ -125,7 +138,18 @@ testCase({
   groups: [['a'], ['b'], ['c', 'd']],
   expected: {
     sorted: 'a -> b -> d -> c',
-    cycles: [],
+  },
+});
+
+testCase({
+  graph: {
+    a: ['b'],
+    b: ['a'],
+  },
+  groups: [['a', 'b']],
+  expected: {
+    sorted: 'b -> a',
+    cycles: ['a -> b -> a'],
   },
 });
 
@@ -138,12 +162,34 @@ testCase({
   groups: [['a', 'b', 'c']],
   expected: {
     sorted: 'c -> b -> a',
-    cycles: [
-      {
-        a: ['b'],
-        b: ['c'],
-        c: ['a'],
-      },
-    ],
+    cycles: ['a -> b -> c -> a'],
   },
 });
+
+testCase({
+  graph: {
+    a: ['b'],
+    b: ['c', 'a'],
+    c: ['a'],
+  },
+  groups: [['a', 'b', 'c']],
+  expected: {
+    sorted: 'c -> b -> a',
+    cycles: ['a -> b -> c -> a', 'a -> b -> a'],
+  },
+});
+
+testCase({
+  graph: {
+    a: ['b'],
+    b: ['c'],
+    c: ['a'],
+  },
+  groups: [['a', 'c'], ['b']],
+  expected: {
+    sorted: 'c -> a -> b',
+    cycles: ['a -> b -> c -> a'],
+  },
+});
+
+console.log(chalk.white('\n\n'));
