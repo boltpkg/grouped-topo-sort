@@ -62,7 +62,7 @@ function groupedTopoSort(graph, groups) {
     walkBranch(nodes);
     visitedNodes = visitedNodes.concat(group.contains);
 
-    return g;
+    return group;
   }
 
   const sortedGroups = groups.map(sortGroup);
