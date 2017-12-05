@@ -21,5 +21,5 @@ const graph = {
 // which lets us break the cycle and return a valid result
 const groups = [['a'], ['b', 'c', 'd']];
 
-const result = sort(graph, groups); // { sorted: 'a -> d -> c -> b' }
+const result = sort(graph, groups); // { sorted: ['a', 'd', 'c', 'b'] }
 ```
